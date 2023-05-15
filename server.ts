@@ -37,7 +37,7 @@ const run = async () => {
   const balances = await multicallContract.methods
     .aggregate(
       encodesGetEthBalance.map((encode: string) => {
-        return ["0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441", encode];
+        return [multicallContractAddress, encode];
       })
     )
     .call();
