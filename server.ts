@@ -51,24 +51,25 @@ const run = async () => {
     );
   content = content + `ETH,${balance.dividedBy(1e18).toString()}\n`;
 
+  const encodesGetErc20Balance = JSON.parse(wallets).wallets.map(
+    (wallet: string) => {
+      return web3.eth.abi.encodeFunctionCall(
+        {
+          constant: true,
+          inputs: [{ name: "_owner", type: "address" }],
+          name: "balanceOf",
+          outputs: [{ name: "balance", type: "uint256" }],
+          payable: false,
+          type: "function",
+        },
+        [wallet]
+      );
+    }
+  );
   for (const token of JSON.parse(wallets).tokens) {
     const contractERC20 = new web3.eth.Contract(JSON.parse(erc20ABI), token);
     const decimals = await contractERC20.methods.decimals().call();
-    const encodesGetErc20Balance = JSON.parse(wallets).wallets.map(
-      (wallet: string) => {
-        return web3.eth.abi.encodeFunctionCall(
-          {
-            constant: true,
-            inputs: [{ name: "_owner", type: "address" }],
-            name: "balanceOf",
-            outputs: [{ name: "balance", type: "uint256" }],
-            payable: false,
-            type: "function",
-          },
-          [wallet]
-        );
-      }
-    );
+
     const balancesErc20 = await multicallContract.methods
       .aggregate(
         encodesGetErc20Balance.map((encode: string) => {
